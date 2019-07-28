@@ -25,6 +25,11 @@ Matrix::Matrix(vector<vector<bool> >entry){
 
 }
 
+Matrix::Matrix(const Matrix& copy) {
+	size = copy.size;
+	m = copy.m;
+}
+
 vector<bool> Matrix::getRow(unsigned int x){
 	vector<bool> res(size);
 	for (int j = 0; j<size; j++){
@@ -48,4 +53,35 @@ void Matrix::Print(){
 		cout << '\n';
 	}
 }
+
+Matrix Matrix::multiply(Matrix& y) {
+	Matrix res(size);
+	if(y.size != size){cout << "The dimension does not match \n"; return res;}	
+
+	bool dot = 0;
+	for (int i = 0; i < size; i++) {
+		for(int j = 0; j < size; j++) {
+			for(int k = 0; k < size; k++) {
+		    		dot = dot^(m.at(i).at(k) & y.m.at(j).at(k));	
+			}
+			res.m.at(i).at(j) = dot;
+			dot = 0;
+		}
+	}
+	return res;
+}
+
+Matrix Matrix:: add(Matrix& y){
+	Matrix res(size);
+	if(y.size != size) {cout << "The dimension does not match \n"; return res;}
+	
+	for(int i = 0; i < size; i++) {
+		for(int j = 0; j < size; j++) {
+			res.m.at(i).at(j) = m.at(i).at(j)^y.m.at(i).at(j);
+		}
+	}
+	return res;
+}
+
+
 
