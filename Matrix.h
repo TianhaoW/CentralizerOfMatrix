@@ -18,8 +18,8 @@ class Matrix{
 		vector<bool> getRow(unsigned int x);
 		vector<bool> getColumn(unsigned int y);
 
-		Matrix multiply(Matrix& y);	
-		Matrix add(Matrix& y);
+		Matrix multiply(const Matrix& y);	
+		Matrix add(const Matrix& y);
 
 		void Print();
 };

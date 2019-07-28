@@ -54,7 +54,7 @@ void Matrix::Print(){
 	}
 }
 
-Matrix Matrix::multiply(Matrix& y) {
+Matrix Matrix::multiply(const Matrix& y) {
 	Matrix res(size);
 	if(y.size != size){cout << "The dimension does not match \n"; return res;}	
 
@@ -71,7 +71,7 @@ Matrix Matrix::multiply(Matrix& y) {
 	return res;
 }
 
-Matrix Matrix:: add(Matrix& y){
+Matrix Matrix:: add(const Matrix& y){
 	Matrix res(size);
 	if(y.size != size) {cout << "The dimension does not match \n"; return res;}
 	

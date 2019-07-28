@@ -3,14 +3,23 @@
 
 #include<vector>
 
+using namespace std;
+
 class Poly{
+
+	public:	
 	vector<bool> pol;
 	int deg;
 
-	public:
-	
 	Poly(vector<bool> p);
 	Poly();
+	Poly(const Poly& copy);
+	
+	void Print();
+	
+	Poly add(const Poly& y);
+	Poly multiply(const Poly& y);
+
 }
 
 #endif
