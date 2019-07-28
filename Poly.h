@@ -20,6 +20,6 @@ class Poly{
 	Poly add(const Poly& y);
 	Poly multiply(const Poly& y);
 
-}
+};
 
 #endif
