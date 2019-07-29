@@ -28,8 +28,21 @@ Poly::Poly(const Poly& copy){
 	deg = copy.deg;
 }
 
+Poly::Poly(unsigned int n) {
+	pol.resize(n + 1, 0);
+	pol.at(n) = 1;
+	deg = n;
+}
 
-void Poly::Print(){
+/*
+Poly& Poly::operator=(Poly& y){
+	pol = y.pol;
+	deg = y.deg;
+	return *this;
+}
+*/
+
+void Poly::Print() const{
 	if(deg == -1) {cout << "0 \n"; return;}
 	int index = 1;
 	if(pol[0]) {
@@ -46,7 +59,7 @@ void Poly::Print(){
 	cout <<'\n';
 }
 
-Poly Poly::add(const Poly& y) {
+Poly Poly::add(const Poly& y) const{
 	if(deg == -1) {return y;}
 	if(y.deg == -1) {return *this;}
 	
@@ -68,7 +81,7 @@ Poly Poly::add(const Poly& y) {
 	return Poly(res);
 }
 	
-Poly Poly::multiply(const Poly& y) {
+Poly Poly::multiply(const Poly& y) const{
 	Poly res;
 	if(deg == -1 || y.deg == -1) {return res;}
 	
@@ -92,4 +105,42 @@ Poly Poly::multiply(const Poly& y) {
 	return res;
 }
 
+void Poly::divide(const Poly& b, Poly& q, Poly& r) const{
+	if(deg < b.deg){
+		q = Poly();
+		r = *this;
+		return;
+	}
+	q = Poly(deg - b.deg);
+	r = this->add(b.multiply(q));
+	
+	while(r.deg>=b.deg) {
+		Poly qtmp(r.deg - b.deg);
+		q = q.add(qtmp);
+		r = r.add(b.multiply(qtmp));
+	}
+}
+
+void Poly::gcd(const Poly& y, Poly& a, Poly& b, Poly& d) const{
+	/*
+	cout << "calling gcd with \n";
+	this->Print();
+	y.Print();
+	cout << endl;
+	*/
+
+	if(this->deg == -1) {
+		a = Poly();
+		b = Poly(0);
+		d = y;
+		return;
+	}
+	Poly qtmp, rtmp, atmp, btmp;	
+	y.divide(*this, qtmp, rtmp);
+	rtmp.gcd(*this, atmp, btmp, d);	
+	
+	a =  btmp.add(qtmp.multiply(atmp));
+	b =  atmp;
+
+}
 

@@ -1,5 +1,6 @@
 #include<iostream>
 #include "Matrix.h"
+#include "Poly.h"
 #include<vector>
 
 using namespace std;
@@ -39,4 +40,23 @@ int main(){
 	Matrix m5(m6.multiply(m3));
 	cout<<"Multiplying the second matrix with the third Matrix \n";
 	m5.Print();
+
+	vector<bool> v;
+	v.push_back(1);
+	v.push_back(1);
+	v.push_back(1);
+	v.push_back(1);	
+	Poly p(v);
+	p.Print();
+	Matrix m7(v);
+	m7.Print();
+
+	Matrix m8(m7.multiply(m7));
+	m8.Print();
+
+	Matrix m10(m7.exp(2));
+	Matrix m11(m7.exp(3));
+
+	m10.Print();
+	m11.Print();
 }

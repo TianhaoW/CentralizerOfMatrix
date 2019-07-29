@@ -1,6 +1,7 @@
 #include "Matrix.h"
 #include<iostream>
 #include<string>
+#include "Poly.h"
 
 using namespace std;
 
@@ -29,6 +30,21 @@ Matrix::Matrix(const Matrix& copy) {
 	size = copy.size;
 	m = copy.m;
 }
+
+Matrix::Matrix(const Poly& p) {
+	size = p.deg;
+	m.resize(size);
+	for(int i = 0; i < size; i++) {
+		m.at(i).resize(size, 0);
+	}
+	for(int i = 0; i < size - 1; i++) {
+		m.at(i + 1).at(i) = 1;
+	}
+	for(int i = 0; i < size; i++) {
+		m.at(i).at(size - 1) = p.pol.at(i);
+	}
+}
+
 
 vector<bool> Matrix::getRow(unsigned int x){
 	vector<bool> res(size);
@@ -62,7 +78,7 @@ Matrix Matrix::multiply(const Matrix& y) {
 	for (int i = 0; i < size; i++) {
 		for(int j = 0; j < size; j++) {
 			for(int k = 0; k < size; k++) {
-		    		dot = dot^(m.at(i).at(k) & y.m.at(j).at(k));	
+		    		dot = dot^(m.at(i).at(k) & y.m.at(k).at(j));
 			}
 			res.m.at(i).at(j) = dot;
 			dot = 0;
@@ -71,7 +87,7 @@ Matrix Matrix::multiply(const Matrix& y) {
 	return res;
 }
 
-Matrix Matrix:: add(const Matrix& y){
+Matrix Matrix::add(const Matrix& y){
 	Matrix res(size);
 	if(y.size != size) {cout << "The dimension does not match \n"; return res;}
 	
@@ -83,5 +99,19 @@ Matrix Matrix:: add(const Matrix& y){
 	return res;
 }
 
-
+Matrix Matrix::exp(unsigned int i){
+	if(i == 0){
+		Matrix id(size);
+		for(int j = 0; j < size; j++){
+			id.m.at(j).at(j) = 1;
+		}
+		return id;
+	}
+	Matrix res(*this);
+	while(i > 1) {
+		res = res.multiply(*this);
+		i--;
+	}	
+	return res;
+}
 
