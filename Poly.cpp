@@ -4,13 +4,31 @@
 
 using namespace std;
 
+/*
+template <class K>
+void Poly<K>::resize(int n, K val){
+	if(val.isZero()){
+		#ifdef DEBUG
+			cout << "The value entered is zero, setting polynomial to zero now\n";	
+		#endif
 
-Poly::Poly(vector<bool> p) {
+		pol.resize(1, val);
+		deg = -1;
+		return;		
+	}
+		pol.resize(n, val);
+		deg = n;
+}
+
+*/
+
+template <class K>
+Poly<K>::Poly(vector<K> p) {
 	int index = p.size() - 1;
-	while(index >= 0 && !p.at(index)){index--;}
+	while(index >= 0 && p.at(index).isZero()){index--;}
 	deg = index;
-	if(deg == -1){pol.resize(1, 0); return;}
-	pol.resize(index + 1, 0);
+	if(deg == -1){pol.resize(1, K(0)); return;}
+	pol.resize(index + 1, K(0));
 	while(index >= 0) {
 		pol.at(index) = p.at(index);
 		index--;
@@ -18,46 +36,44 @@ Poly::Poly(vector<bool> p) {
 }
 
 
-Poly::Poly() {
-	pol.push_back(0);
+template <class K>
+Poly<K>::Poly() {
+	pol.push_back(K(0));
 	deg = -1;
 }
 
-Poly::Poly(const Poly& copy){
+template <class K>
+Poly<K>::Poly(const Poly& copy){
 	pol = copy.pol;
 	deg = copy.deg;
 }
 
-Poly::Poly(unsigned int n) {
-	pol.resize(n + 1, 0);
-	pol.at(n) = 1;
+template <class K>
+Poly<K>::Poly(unsigned int n) {
+	pol.resize(n + 1, K(0));
+	pol.at(n) = K(1);
 	deg = n;
 }
 
-/*
-Poly& Poly::operator=(Poly& y){
-	pol = y.pol;
-	deg = y.deg;
-	return *this;
-}
-*/
-
-void Poly::Print() const{
+template <class K>
+void Poly<K>::Print() const{
 	if(deg == -1) {cout << "0 \n"; return;}
 	int index = 1;
-	if(pol[0]) {
-		cout << "1";
+	if(!pol[0].isZero()) {
+		pol[0].Print();
 	}
 	else {
-		while (!pol[index]) {index++;}
+		while (pol[index].isZero()) {index++;}
+		pol[index].Print();
 		cout << "x^" << index; index++;
 	}
 	while(index <= deg) {
-		if(pol[index]) {cout << "+x^" << index;}
+		if(!pol[index].isZero()) {cout << "+"; pol[index].Print(); cout << "x^" << index;}
 		index++;
 	}
 	cout <<'\n';
 }
+
 
 Poly Poly::add(const Poly& y) const{
 	if(deg == -1) {return y;}
@@ -122,12 +138,6 @@ void Poly::divide(const Poly& b, Poly& q, Poly& r) const{
 }
 
 void Poly::gcd(const Poly& y, Poly& a, Poly& b, Poly& d) const{
-	/*
-	cout << "calling gcd with \n";
-	this->Print();
-	y.Print();
-	cout << endl;
-	*/
 
 	if(this->deg == -1) {
 		a = Poly();
@@ -143,4 +153,5 @@ void Poly::gcd(const Poly& y, Poly& a, Poly& b, Poly& d) const{
 	b =  atmp;
 
 }
+
 
