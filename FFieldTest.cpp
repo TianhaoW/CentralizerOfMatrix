@@ -3,7 +3,7 @@
 #define DEBUG
 
 int main() {
-	const int mod = 7;
+	const int mod = 2;
 
 	FField<mod> a;
 	cout << "constructing 0\n";

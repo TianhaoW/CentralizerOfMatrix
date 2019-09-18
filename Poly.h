@@ -16,7 +16,7 @@ class Poly{
 		Poly(vector<K> p); //k^n \mapsto k[x]
 		Poly(); //zero polynomial
 		Poly(const Poly<K>& copy);
-		Poly(unsigned int n); //poly x^n
+		Poly(unsigned int n); //poly x^{n-1}  Poly(0) will be 0, Poly(1) will be 1
 		Poly(unsigned int n, K a); //poly ax^n
 	
 		//outputs
@@ -26,6 +26,9 @@ class Poly{
 		int getDeg() const {return deg;}
 		const vector<K>& getPoly() const{return pol;}
 		bool isZero() const {return !(deg + 1);}
+		bool isUnit() const {return (deg == 0);}
+
+		//bool operator ==(const Poly<K>& b) const;
 
 		//operations
 		Poly<K> neg() const {
@@ -37,11 +40,15 @@ class Poly{
 		Poly<K> operator + (const Poly<K>& b) const;
 		Poly<K> operator - (const Poly<K>& b) const {return *this+b.neg();}
 		Poly<K> operator * (const Poly<K>& b) const;
-		
+
+
+		//void toMonic();
+
 		void divide(const Poly<K>& b, Poly<K>& q, Poly<K>& r) const; //this=bq+r
 
-		//find a,b,d such that ax+by=d where d=gcd(x,y)
-		//void gcd(const Poly<K>& y, Poly<K>& a, Poly<K>& b, Poly<K>& d) const;
+		// extended gcd algorithm
+		//find x,y,d such that this*x + by=d where d=gcd(this,d)
+		void egcd(const Poly<K>& b, Poly<K>& x, Poly<K>& y, Poly<K>& d) const;
 
 };
 
@@ -73,21 +80,30 @@ Poly<K>::Poly(const Poly& copy){
 
 template <class K>
 Poly<K>::Poly(unsigned int n) {
-	pol.resize(n + 1, K(0));
-	pol.at(n) = K(1);
-	deg = n;
+	if (n == 0) {pol.push_back(K(0)); deg = -1;}
+	else {
+		pol.resize(n, K(0));
+		pol.at(n-1) = K(1);
+		deg = n-1;
+	}
 }
 
 template <class K>
 Poly<K>::Poly(unsigned int n, K a) {
-	pol.resize(n+1, K(0));
-	pol.at(n) = a;
-	deg = n;
+	if(a.isZero()){
+		pol.push_back(K(0));
+		deg = -1;
+	}
+	else {
+		pol.resize(n+1, K(0));
+		pol.at(n) = a;
+		deg = n;
+	}
 }
 
 template <class K>
 void Poly<K>::Print() const{
-	if(deg == -1) {cout << "0 "; return;}
+	if(deg == -1) {cout << "0"; return;}
 	int index = 1;
 	if(!pol[0].isZero()) {
 		#ifdef DEBUG
@@ -136,19 +152,19 @@ Poly<K> Poly<K>::operator * (const Poly<K>& b) const{
 	
 	vector<K> small;
 	vector<K> big;
-	vector<K> tmp;
 
 	if(deg <= b.getDeg()){big = b.getPoly(); small = pol;}
 	else{big = pol; small = b.getPoly();}
 	
 	for(int i = 0; i<small.size(); i++) {
+		vector<K> tmp;
 		if(!small.at(i).isZero()){
 			tmp.resize(big.size() + i, K(0));
 			for(int j = 0; j<big.size(); j++) {
 				tmp.at(i+j) = small.at(i)*big.at(j);
 			}
 			res = res+(Poly(tmp));
-			tmp.resize(1,K(0));
+			//tmp.resize(1,K(0));
 		}
 	}
 	return res;
@@ -175,22 +191,28 @@ void Poly<K>::divide(const Poly<K>& b, Poly<K>& q, Poly<K>& r) const{
 		r = r - (b * qtmp);
 	}
 }
-/*
-void Poly::gcd(const Poly& y, Poly& a, Poly& b, Poly& d) const{
 
-	if(this->deg == -1) {
-		a = Poly();
-		b = Poly(0);
-		d = y;
-		return;
-	}
-	Poly qtmp, rtmp, atmp, btmp;	
-	y.divide(*this, qtmp, rtmp);
-	rtmp.gcd(*this, atmp, btmp, d);	
+template <class K>
+void Poly<K>::egcd(const Poly<K>& b, Poly<K>& x, Poly<K>& y, Poly<K>& d) const{
+	d = gcd((*this), b, x, y);
 	
-	a =  btmp.add(qtmp.multiply(atmp));
-	b =  atmp;
+	//make d to be monic
+	K ini = d.getPoly().back().inverse();
+	Poly<K> div (0, ini);
+	d = d * div;
+	x = x * div;
+	y = y * div;
+	
+}
 
+/*
+template <class K>
+void Poly<K>::toMonic() {
+	K div = pol.back().inverse();
+	for (int i = 0; i<= deg; i++) {
+		pol.at(i) = pol.at(i) * div;
+	}
 }
 */
+
 #endif

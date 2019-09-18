@@ -13,7 +13,7 @@ class FField{
 	public:
 		//constructors
 		FField (){val = 0;}
-		FField (int n){if( n < 0){val = n % N + N;} else {val = n % N;}}
+		FField (int n){val = n % N; if( val < 0){val = val + N;}}
 		
 		//at each step, we keep 0<=val<N 
 		bool isZero() const{return !(val);}
@@ -22,7 +22,7 @@ class FField{
 		FField<N> operator + (const FField<N>& b) const {return FField(val+b.val);}
 		FField<N> operator - (const FField<N>& b) const {return FField(val-b.val);}
 		FField<N> operator * (const FField<N>& b) const {return FField(val*b.val);}
-		void neg() {val = -val % N + N;}
+		void neg() {if(val == 0){return;} val = -val % N + N;}
 
 		FField<N> inverse() const {
 			int x, y;

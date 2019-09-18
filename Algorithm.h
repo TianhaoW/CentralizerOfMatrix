@@ -4,6 +4,7 @@
 using namespace std;
 
 //finding gcd(a, b) in the PID D and return x,y such that ax+by=d;
+
 template <class D>
 D gcd(const D& a, const D& b, D& x, D& y){
 	if(a.isZero()) {
@@ -16,7 +17,7 @@ D gcd(const D& a, const D& b, D& x, D& y){
 	b.divide(a, q, r);	
 	D d = gcd(r, a, x1, y1);
 
-	x = y1 - q*x1;
+	x = y1 - q * x1;
 	y = x1;
 
 	return d;

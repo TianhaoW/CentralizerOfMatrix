@@ -8,7 +8,7 @@
 using namespace std;
 
 int main(){
-	const int mod = 7;
+	const int mod = 2;
 	cout << "In mod" << mod << "\n";
 
 	Poly<FField<mod> > p1;
@@ -16,7 +16,7 @@ int main(){
 	p1.Print();
 	cout << "\n";
 
-	Poly< FField<mod> > p2 (2);
+	Poly< FField<mod> > p2 (3);
 	cout << "Constructing default deg 2 polynomial \n";
 	p2.Print();
 	cout << "\n";
@@ -79,4 +79,40 @@ int main(){
 	cout << "\n";
 	r.Print();
 	cout << "\n";
+
+	vector<FField<mod> > vec4;
+	vec4.push_back(FField<mod>(1));
+	vec4.push_back(FField<mod>(2));
+	vec4.push_back(FField<mod>(1));
+	cout << "Constructing 1+2x+x^2\n";
+	Poly<FField<mod> > p10(vec4);
+	p10.Print();
+	cout << "\n";
+	
+	vector<FField<mod> > vec5;
+	vec5.push_back(FField<mod>(3));
+	vec5.push_back(FField<mod>(4));
+	vec5.push_back(FField<mod>(1));
+	cout << "Constructing 3+4x+x^2\n";
+	Poly<FField<mod> > p11(vec5);
+	p11.Print();
+	cout << "\n";
+
+	Poly<FField<mod> > x,y,d;
+	p10.egcd(p11, x,y,d);
+	cout << "Runging gcd with (1+2x+x^2, 3+4x+x^2)\n";
+	x.Print();
+	cout << "\n";
+	y.Print();
+	cout << "\n";
+	d.Print();
+	cout << "\n";
+
+	vector<FField<mod> > vec10;
+	vec10.push_back(FField<mod>(1));
+	vec10.push_back(FField<mod>(1));
+	Poly<FField<mod> > p12(vec10);
+	Poly<FField<mod> > p14 = p12*p12;
+	p14.Print();
+
 }

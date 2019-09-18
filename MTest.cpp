@@ -1,62 +1,92 @@
 #include<iostream>
 #include "Matrix.h"
 #include "Poly.h"
+#include "FField.h"
 #include<vector>
 
 using namespace std;
 
 int main(){
+	const int mod = 2;
+
+	/*
 	cout<<"Constructing Default Matrix\n";
-	Matrix m1;
+	Matrix<FField<mod> > m1;
 	m1.Print();
 
 	cout<<"Constructing Default Matrix with size 2\n";
-	Matrix m2(2);
+	Matrix<FField<mod> > m2(2);
 	m2.Print();
 
-	vector<bool> r1;
-	vector<bool> r2;
-	r1.push_back(1);
-	r1.push_back(1);
-	r2.push_back(1);
-	r2.push_back(1);
-	vector<vector<bool> > m;
-	m.push_back(r1);
-	m.push_back(r2);
-
-	Matrix m3(m);
-	cout<<"Contructing the Identity Matrix\n";
+	cout << "Constructing Matrix from given double array\n";
+	vector< vector<FField<mod> > > ent;
+	vector<FField<mod> > vec1;
+	vec1.push_back(FField<mod>(2));
+	vec1.push_back(FField<mod>(1));
+	vec1.push_back(FField<mod>(5));	
+	vector<FField<mod> > vec2;
+	vec2.push_back(FField<mod>(1));
+	vec2.push_back(FField<mod>(2));
+	vec2.push_back(FField<mod>(3));
+	vector<FField<mod> > vec3;
+	vec3.push_back(FField<mod>(2));
+	vec3.push_back(FField<mod>(3));
+	vec3.push_back(FField<mod>(11));
+	ent.push_back(vec1);
+	ent.push_back(vec2);
+	ent.push_back(vec3);
+	Matrix<FField<mod> > m3(ent);
 	m3.Print();
 
-	Matrix m6(m3);
-	m6.setEntry(1,1,0);
-	cout<<"Another Matrix\n";
-	m6.Print();
-
-	Matrix m4(m6.add(m3));
-	cout<<"Addint the second matrix to the first Matrix \n";
+	cout << "m3+m3 = \n";
+	Matrix<FField<mod> > m4;
+	m4 = m3+m3;
 	m4.Print();
-	
-	Matrix m5(m6.multiply(m3));
-	cout<<"Multiplying the second matrix with the third Matrix \n";
+
+	cout << "m3*m3 = \n";
+	Matrix<FField<mod> > m5;
+	m5 = m3*m3;
 	m5.Print();
 
-	vector<bool> v;
-	v.push_back(1);
-	v.push_back(1);
-	v.push_back(1);
-	v.push_back(1);	
-	Poly p(v);
-	p.Print();
-	Matrix m7(v);
-	m7.Print();
+	*/
 
-	Matrix m8(m7.multiply(m7));
-	m8.Print();
+	cout << "Constructing polynomial Matrix from given double array\n";
+	vector< vector< Poly<FField<mod> > > > ent2;
+	vector<Poly< FField<mod> > > vec4;
 
-	Matrix m10(m7.exp(2));
-	Matrix m11(m7.exp(3));
+	vector<FField<mod> >v11;
+	v11.push_back(FField<mod> (-2));
+	v11.push_back(FField<mod> (1));
+	Poly<FField<mod> > p11(v11);
+	vec4.push_back(v11);
+	vec4.push_back(Poly< FField<mod> >(0, FField<mod>(-1)));
+	vec4.push_back(Poly< FField<mod> >(0, FField<mod>(0)));	
+	vector<Poly< FField<mod> > >vec5;
+	vec5.push_back(Poly< FField<mod> >(0, FField<mod>(-1)));
+	vector<FField<mod> >v22;
+	v22.push_back(FField<mod> (-2));
+	v22.push_back(FField<mod> (1));
+	Poly<FField<mod> > p22(v22);
+	vec5.push_back(v22);
+	vec5.push_back(Poly< FField<mod> >(0, FField<mod>(-3)));
+	vector<Poly< FField<mod> > >vec6;
+	vec6.push_back(Poly< FField<mod> >(0, FField<mod>(-2)));
+	vec6.push_back(Poly< FField<mod> >(0, FField<mod>(-3)));
+	vector<FField<mod> >v33;
+	v33.push_back(FField<mod> (-1));
+	v33.push_back(FField<mod> (1));
+	Poly<FField<mod> > p33(v33);
+	vec6.push_back(v33);
+	ent2.push_back(vec4);
+	ent2.push_back(vec5);
+	ent2.push_back(vec6);
+	Matrix<Poly<FField<mod> > > m6(ent2);
+	m6.Print();
 
-	m10.Print();
-	m11.Print();
+	cout << "Runging the Simith Normal Form Algorithm\n";	
+	Matrix<Poly<FField<mod> > > L(3);
+	Matrix<Poly<FField<mod> > > R(3);
+
+	m6.SNF(L,R);
 }
+
