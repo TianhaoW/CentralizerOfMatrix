@@ -7,7 +7,7 @@
 using namespace std;
 
 int main(){
-	const int mod = 2;
+	const int mod = 5;
 
 	/*
 	cout<<"Constructing Default Matrix\n";
@@ -55,25 +55,25 @@ int main(){
 	vector<Poly< FField<mod> > > vec4;
 
 	vector<FField<mod> >v11;
-	v11.push_back(FField<mod> (-2));
+	v11.push_back(FField<mod> (4));
 	v11.push_back(FField<mod> (1));
 	Poly<FField<mod> > p11(v11);
 	vec4.push_back(v11);
-	vec4.push_back(Poly< FField<mod> >(0, FField<mod>(-1)));
+	vec4.push_back(Poly< FField<mod> >(0, FField<mod>(0)));
 	vec4.push_back(Poly< FField<mod> >(0, FField<mod>(0)));	
 	vector<Poly< FField<mod> > >vec5;
-	vec5.push_back(Poly< FField<mod> >(0, FField<mod>(-1)));
+	vec5.push_back(Poly< FField<mod> >(0, FField<mod>(0)));
 	vector<FField<mod> >v22;
-	v22.push_back(FField<mod> (-2));
+	v22.push_back(FField<mod> (0));
 	v22.push_back(FField<mod> (1));
 	Poly<FField<mod> > p22(v22);
 	vec5.push_back(v22);
-	vec5.push_back(Poly< FField<mod> >(0, FField<mod>(-3)));
+	vec5.push_back(Poly< FField<mod> >(0, FField<mod>(4)));
 	vector<Poly< FField<mod> > >vec6;
-	vec6.push_back(Poly< FField<mod> >(0, FField<mod>(-2)));
-	vec6.push_back(Poly< FField<mod> >(0, FField<mod>(-3)));
+	vec6.push_back(Poly< FField<mod> >(0, FField<mod>(0)));
+	vec6.push_back(Poly< FField<mod> >(0, FField<mod>(1)));
 	vector<FField<mod> >v33;
-	v33.push_back(FField<mod> (-1));
+	v33.push_back(FField<mod> (3));
 	v33.push_back(FField<mod> (1));
 	Poly<FField<mod> > p33(v33);
 	vec6.push_back(v33);

@@ -17,12 +17,14 @@ class FField{
 		
 		//at each step, we keep 0<=val<N 
 		bool isZero() const{return !(val);}
-		
+		bool isUnit() const{return val;}
+
+
 		//operations
 		FField<N> operator + (const FField<N>& b) const {return FField(val+b.val);}
 		FField<N> operator - (const FField<N>& b) const {return FField(val-b.val);}
 		FField<N> operator * (const FField<N>& b) const {return FField(val*b.val);}
-		void neg() {if(val == 0){return;} val = -val % N + N;}
+		FField<N> neg() const {return FField<N>(-val);}
 
 		FField<N> inverse() const {
 			int x, y;

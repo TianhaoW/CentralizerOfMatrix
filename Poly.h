@@ -33,7 +33,7 @@ class Poly{
 		//operations
 		Poly<K> neg() const {
 			vector<K> res = pol; 
-			for(int i=0; i<=deg; i++){res.at(i).neg();} 
+			for(int i=0; i<=deg; i++){res.at(i) = res.at(i).neg();} 
 			return Poly<K>(res);
 		}
 		//void neg(){for(int i = 0; i<=deg; i++) {pol.at(i).neg();}}
@@ -41,6 +41,10 @@ class Poly{
 		Poly<K> operator - (const Poly<K>& b) const {return *this+b.neg();}
 		Poly<K> operator * (const Poly<K>& b) const;
 
+		Poly<K> inverse() const {
+			if ((*this).isUnit()) {return Poly<K>(0, pol.at(0).inverse());}
+			else {cout << "inverse does not exist\n"; return Poly<K>(0);}       
+		}
 
 		//void toMonic();
 
@@ -106,9 +110,6 @@ void Poly<K>::Print() const{
 	if(deg == -1) {cout << "0"; return;}
 	int index = 1;
 	if(!pol[0].isZero()) {
-		#ifdef DEBUG
-			cout << "The initial term is not 0\n";
-		#endif
 		pol[0].Print();
 	}
 	else {
@@ -164,7 +165,6 @@ Poly<K> Poly<K>::operator * (const Poly<K>& b) const{
 				tmp.at(i+j) = small.at(i)*big.at(j);
 			}
 			res = res+(Poly(tmp));
-			//tmp.resize(1,K(0));
 		}
 	}
 	return res;

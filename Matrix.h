@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include "Poly.h"
 
 using namespace std;
 
@@ -13,28 +14,42 @@ class Matrix{
 		vector<vector<D> > entry;
 		unsigned int dim;
 	public:
-		//constructor
+		//constructors
 		Matrix(unsigned int n = 1); //constructor for I_n, default is I_1
-		Matrix(vector<vector <D> >ent); //construct matrix from a double array, no check for validity
+		Matrix(unsigned int n, D a); //constructor for aI_n
+		Matrix(vector<vector <D> >ent);//construct matrix from a double array, no check for validity
 		Matrix(const Matrix<D>& copy);
+		Matrix(const Poly<D>& f); //construct the companian matrix C(f)
 
 		//modifier
 		void setEnt(unsigned int i, unsigned int j, D val){entry.at(i).at(j) = val;}
 
 		//accessor
-		vector<D> getRow(unsigned int x) const;
-		vector<D> getColumn(unsigned int y) const;
 		vector< vector<D> > getEnt() const {return entry;}
 		unsigned int getDim() const {return dim;} 
+		vector<D> getCol(unsigned int j) const;
 
 		//operations
 		Matrix<D> operator * (const Matrix<D>& b) const;
-		Matrix<D> operator + (const Matrix<D>& b) const;	
-		//Matrix<D> operator ^ (unsigned int n) const;
+		vector<D> operator * (const vector<D>& b) const;
+		Matrix<D> operator + (const Matrix<D>& b) const;
+		Matrix<D> operator - (const Matrix<D>& b) const;	
+		Matrix<D> exp(unsigned int n) const;
 
-		//Simith Normal Form, return L,R diag such that this = L*diag*R
+		Matrix<D> mminor(unsigned int i, unsigned int j) const;
+		Matrix<D> inverse() const;
+		D det() const;
+
+		//Simith Normal Form, return L,R diag such that L*this*R = diag()
 		//This is not the general algorithm, this only supports matrix of the form xI-A\in M_n(k[x])
 		void SNF(Matrix<D>& L, Matrix<D>& R);
+
+		//D is assumed as a field here, the returned matrix is the transformation matrix
+		Matrix<D> Invf(vector<Poly<D> >& inv) const;
+
+		//D is assumed as a field here
+		//return the k-basis for the centralizer
+		vector<Matrix<D> > Cent();
 
 		void Print() const;
 };
@@ -46,6 +61,16 @@ Matrix<D>::Matrix(unsigned int n) {
 	for(int i = 0; i < n; i++){
 		entry.at(i).resize(n, D(0));
 		entry.at(i).at(i) = (D(1));
+	}
+}
+
+template<class D>
+Matrix<D>::Matrix(unsigned int n, D a) {
+	dim = n;
+	entry.resize(n);
+	for(int i = 0; i < n; i++){
+		entry.at(i).resize(n, D(0));
+		entry.at(i).at(i) = a;
 	}
 }
 
@@ -62,12 +87,48 @@ Matrix<D>::Matrix(const Matrix<D>& copy){
 }
 
 template<class D>
+Matrix<D>::Matrix(const Poly<D>& f){
+	dim = f.getDeg();
+	entry.resize(dim);
+	for (int i = 0; i < dim; i++) {
+		entry.at(i).resize(dim, D(0));
+		entry.at(i).at(dim-1) = f.getPoly().at(i).neg();
+	}
+	for (int i = 1; i < dim; i++) {
+		entry.at(i).at(i-1) = D(1);
+	}
+}
+
+template<class D>
+vector<D> Matrix<D>::getCol(unsigned int j) const{
+	vector<D> ret;
+	if(j >= dim){cout << "out of bounds\n"; return ret;}
+	for (int i = 0; i < dim; i++) {
+		ret.push_back(entry.at(i).at(j));
+	}
+	return ret;
+}
+
+template<class D>
 Matrix<D> Matrix<D>::operator + (const Matrix<D>& b) const{
 	if(dim != b.getDim()) {cout << "Error: Dimension does not match\n"; return Matrix<D>(1);}
 	Matrix<D> res(dim);
 	for(int i = 0; i < dim; i++) {
 		for(int j = 0; j < dim; j++) {
 			res.setEnt(i, j, entry.at(i).at(j) + b.getEnt().at(i).at(j));
+		}
+	}
+	return res;
+	
+}
+
+template<class D>
+Matrix<D> Matrix<D>::operator - (const Matrix<D>& b) const{
+	if(dim != b.getDim()) {cout << "Error: Dimension does not match\n"; return Matrix<D>(1);}
+	Matrix<D> res(dim);
+	for(int i = 0; i < dim; i++) {
+		for(int j = 0; j < dim; j++) {
+			res.setEnt(i, j, entry.at(i).at(j) - b.getEnt().at(i).at(j));
 		}
 	}
 	return res;
@@ -89,6 +150,96 @@ Matrix<D> Matrix<D>::operator * (const Matrix<D>& b) const{
 	}
 	return res;
 }
+
+template<class D>
+vector<D> Matrix<D>::operator * (const vector<D>& b) const{
+	vector<D> res;
+	if(dim != b.size()) {cout << "Error: Dimension does not match\n"; return res;}
+	for (int i = 0; i < dim; i++) {
+		D tmp(0);
+		for(int j = 0; j < dim; j++){
+			tmp = tmp + (entry.at(i).at(j) * b.at(j));
+		}
+		res.push_back(tmp);
+	}
+	return res;
+}
+
+template<class D>
+Matrix<D> Matrix<D>::exp(unsigned int n) const{
+	if (n == 0) {return Matrix<D>(dim);}
+	Matrix<D> res = (*this);
+	n--;
+	while (n > 0) {
+		res = res * (*this);
+		n--;
+	}
+	return res;
+}
+
+template<class D>
+Matrix<D> Matrix<D>::mminor(unsigned int i, unsigned int j) const{
+	Matrix<D> ret(dim-1);
+	if (i > dim || j > dim) {cout << "Error: Finding minor, out of range\n"; return ret;}
+	
+	int m = 0;
+	int n = 0;
+
+	while(m < dim - 1){
+		while(n < dim - 1) {
+			if(m < i){
+				if (n < j ) {ret.setEnt(m,n, entry.at(m).at(n));}
+				else {ret.setEnt(m,n, entry.at(m).at(n+1));}
+			}
+			else{
+				if (n < j) {ret.setEnt(m,n, entry.at(m+1).at(n));}
+				else {ret.setEnt(m,n, entry.at(m+1).at(n+1));}
+			}
+			n++;
+		}
+		m++;
+		n = 0;
+	}
+	return ret;
+}
+
+template<class D>
+D Matrix<D>::det() const {
+	if (dim == 1){return entry.at(0).at(0);}
+	D tmp(0);
+	
+	for (int i = 0; i < dim; i++) {
+		if(entry.at(0).at(i).isZero()){continue;}
+		if(i % 2){
+			tmp = tmp - (entry.at(0).at(i)) * (*this).mminor(0,i).det();
+		}
+		else {
+			tmp = tmp + (entry.at(0).at(i)) * (*this).mminor(0,i).det();
+		}
+	}
+	return tmp;
+}
+
+template<class D>
+Matrix<D> Matrix<D>::inverse() const{
+	D det = (*this).det();
+	if (!det.isUnit()){cout << "The matrix is not invertible\n";}
+	D fac = det.inverse();
+	
+	Matrix<D> ret(dim);
+	for (int i = 0; i < dim; i++) {
+		for (int j = 0; j < dim; j++) {
+			if((i+j)%2){
+				ret.setEnt(j,i, fac * (*this).mminor(i,j).det().neg());
+			}
+			else {
+				ret.setEnt(j,i, (fac * (*this).mminor(i,j).det()));
+			}
+		}
+	}
+	return ret;
+}
+
 
 template<class D>
 void Matrix<D>::Print() const {
@@ -248,7 +399,7 @@ void Matrix<D>::SNF(Matrix<D>& L, Matrix<D>& R){
 	for (int i = 0; i < dim - 1; i++){
 		if (entry.at(i).at(i).isUnit()){cout << "Rearranging: Unit case\n"; continue;}
 		D q,r;
-		entry.at(i).at(i).divide(entry.at(i+1).at(i+1), q, r);
+		entry.at(i+1).at(i+1).divide(entry.at(i).at(i), q, r);
 		if (r.isZero()){cout << "Rearranging: divide case\n"; continue;}
 		
 		cout << "Rearranging: not divide case\n";
@@ -257,8 +408,15 @@ void Matrix<D>::SNF(Matrix<D>& L, Matrix<D>& R){
 		Matrix<D> Ltmp(dim);
 
 		Rtmp.setEnt(i+1, i, D(1));
+
+		cout << "Printing the Rtmp\n";
+		Rtmp.Print();
+
 		(*this) = (*this) * Rtmp;
 		R = R * Rtmp;
+
+		cout << "Printing the result matrix\n";
+		(*this).Print();
 
 		D x, y, d;
 		entry.at(i).at(i).egcd(entry.at(i+1).at(i), x, y, d);
@@ -266,7 +424,7 @@ void Matrix<D>::SNF(Matrix<D>& L, Matrix<D>& R){
 		if(d.isUnit()){
 			Ltmp.setEnt(i,i, x);
 			Ltmp.setEnt(i,i+1, y);
-			Ltmp.setEnt(i+1,i, D(0)-entry.at(i).at(i+1));
+			Ltmp.setEnt(i+1,i, D(0)-entry.at(i+1).at(i));
 			Ltmp.setEnt(i+1,i+1, entry.at(i).at(i));
 		}
 		else {
@@ -287,21 +445,112 @@ void Matrix<D>::SNF(Matrix<D>& L, Matrix<D>& R){
 		(*this).Print();
 
 		//Eliminating Column Entries
-		if(entry.at(i+1).at(i).isZero()){cout << "isZero for eliminating\n"; continue;}
+
+		if(entry.at(i).at(i+1).isZero()){cout << "isZero for eliminating\n"; continue;}
 		else {
-			Matrix<D> Ltmp(dim);
+			Matrix<D> Rtmp(dim);
 			D q,r;
 
-			entry.at(i+1).at(i).divide(entry.at(i).at(i), q, r);
-			Ltmp.setEnt(i+1,i, D(0)-q);
-			L = Ltmp * L;
-			(*this) = Ltmp * (*this);	
-			cout << "Printing the Ltmp for eliminating matrices\n";
-			Ltmp.Print();
-			cout << "Printing the result matrix\n";
+			entry.at(i).at(i+1).divide(entry.at(i).at(i), q, r);
+			Rtmp.setEnt(i,i+1, D(0)-q);
+			R = R * Rtmp;
+			(*this) = (*this) * Rtmp;
+			cout << "Printing the Rtmp for eliminating matrices\n";
+			Rtmp.Print();
+			cout << "Printing the result matrix after row elimination\n";
 			(*this).Print();
 		}
 	}
+	cout << "Printing the final matrix L\n";
+	L.Print();
+	cout << "Printing the final matrix R\n";
+	R.Print();
+	cout << "Printing the result matrix \n";
+	(*this).Print();
+}
+
+template<class D>
+Matrix<D> Matrix<D>::Invf(vector<Poly<D> >& inv) const{
+	inv.clear();
+
+	vector<int> deg;
+
+	//Converting *this to a matrix in D[x]
+	Matrix<Poly<D> > conv(dim);
+	for (int i = 0; i< dim; i++){
+		for(int j = 0; j< dim; j++){
+			conv.setEnt(i,j,Poly<D>(0, entry.at(i).at(j)));
+		}
+	}
+
+	//Finding the Smith Normal Form of xI-A
+	Matrix<Poly<D> > tmp = Matrix<Poly<D> >(dim, Poly<D>(2)) - conv;	
+	Matrix<Poly<D> > L, R;
+	tmp.SNF(L, R);
+	
+	int index = 0;
+
+	//Obtaining the Invariant Factors
+	for(int i = 0; i < dim ; i++){
+		if (tmp.getEnt().at(i).at(i).isUnit()){deg.push_back(0); index++; continue;}
+		else {
+			inv.push_back(tmp.getEnt().at(i).at(i));
+			deg.push_back(tmp.getEnt().at(i).at(i).getDeg());
+			cout << "Printing the saved degree\n";
+			cout << tmp.getEnt().at(i).at(i).getDeg();
+			cout << "\n";
+		}
+	}
+
+	cout << "index is " << index << "\n";
+
+	//Constructing the transformation matrix
+	Matrix<Poly<D> > Linv = L.inverse();
+	Matrix<D> P(dim);
+	int j = 0; // the column index 
+
+	while(index < dim){
+		vector<Poly<D> > y = Linv.getCol(index);
+		vector<D> col;
+
+		// the phi function
+		for (int i = 0; i < dim; i++){
+			col.push_back(y.at(i).getPoly().at(0));
+		}
+		for (int i = 1; i < dim; i++) {
+			int counter = 0;
+			vector<D> coltmp;
+			for(int j = 0; j < dim; j++){
+				if (i >= y.at(j).getPoly().size()) {
+					counter++;
+					coltmp.push_back(D(0));
+				}
+				else {
+					coltmp.push_back(y.at(j).getPoly().at(i));
+				}
+			}
+			if(counter == dim) {break;}
+			coltmp = ((*this).exp(i)) * coltmp;
+
+			for(int i = 0; i < dim; i++){
+				col.at(i) = col.at(i)+coltmp.at(i);
+			}
+		}
+		
+		// updating the matrix P
+		for (int i = 0; i < deg.at(index); i++){
+			cout << deg.at(index);
+			cout << "Updating P\n";
+			for (int k = 0; k < dim; k++) {
+				P.setEnt(k, j, col.at(k));
+			}
+			col = (*this) * col;
+			j++;
+		}
+		index++;
+	}
+
+	return P;
 }
 
 
