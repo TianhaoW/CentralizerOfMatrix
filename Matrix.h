@@ -49,7 +49,7 @@ class Matrix{
 
 		//D is assumed as a field here
 		//return the k-basis for the centralizer
-		vector<Matrix<D> > Cent();
+		vector<Matrix<D> > Cent() const;
 
 		void Print() const;
 };
@@ -553,5 +553,135 @@ Matrix<D> Matrix<D>::Invf(vector<Poly<D> >& inv) const{
 	return P;
 }
 
+
+template <class D>
+vector<Matrix<D> > Matrix<D>::Cent() const{
+	vector<Poly<D> > inv;
+	Matrix<D> P = (*this).Invf(inv);
+	Matrix<D> Pinv = P.inverse();
+
+	//dimension of the centralizer as k-vector space
+	int Cdim = 0;
+	for(int i = 0; i < inv.size(); i++){
+		Cdim = Cdim + (2 * i + 1) * inv.at(inv.size() - i - 1).getDeg();
+	}
+	cout << "The k-dimension of the centralizer is " << Cdim << "\n";
+
+	//constructing the k-basis for each block
+	vector<vector< vector <Matrix<D> > > >block;
+	for(int i = 0; i < inv.size(); i++) {
+		vector<vector<Matrix<D> > >row;
+		for(int j = 0; j < inv.size(); j++){
+			vector<Matrix<D> > basis;
+			Matrix<D> cf = Matrix<D>(inv.at(i));
+
+			if (i == j){
+				basis.push_back(Matrix<D>(inv.at(i).getDeg()));
+				for(int k = 0; k < inv.at(i).getDeg() - 1; k++){
+					basis.push_back(cf);
+					cf = cf * cf;
+				}
+			}
+			else if(i < j){
+				//constructing the generating vector
+				vector<D> q;
+				q.resize(inv.at(i).getDeg(), D(0));
+				q.at(0) = D(1);
+				
+				//constructing the generating matrix
+				Matrix<D> qm(inv.at(j).getDeg());
+				for(int c = 0; c < inv.at(j).getDeg(); c++) {
+					for(int r = 0; r < inv.at(i).getDeg(); r++){
+						qm.setEnt(r, c, q.at(r));
+					}
+					q = cf * q;
+				}
+
+				//constructing the basis
+				for(int k = 0; k < inv.at(i).getDeg(); k++) {
+					basis.push_back(qm);
+
+					for(int c = 0; c < inv.at(j).getDeg() - 1; c++) {
+						for(int r = 0; r < inv.at(i).getDeg(); r++) {
+							qm.setEnt(r,c, qm.getEnt().at(r).at(c+1));
+						}
+					}
+					for(int r = 0; r < inv.at(i).getDeg(); r++) {
+						qm.setEnt(r, inv.at(j).getDeg() - 1, q.at(r));
+					}
+					q = cf * q;
+				}
+			}
+			else {
+				//constructing the generating vector
+
+				Poly<D> qtmp, rtmp;
+
+				inv.at(i).divide(inv.at(j), qtmp, rtmp);
+
+				vector<D> q;
+				q.resize(inv.at(i).getDeg(), D(0));
+				for (int k = 0; k <= qtmp.getDeg(); k++) {
+					q.at(k) = qtmp.getPoly().at(k);
+				}
+				
+				//constructing the generating matrix
+				Matrix<D> qm(inv.at(i).getDeg());
+				for(int c = 0; c < inv.at(i).getDeg(); c++) {
+					for(int r = 0; r < inv.at(i).getDeg(); r++){
+						qm.setEnt(r, c, q.at(r));
+					}
+					q = cf * q;
+				}
+
+				//constructing the basis
+				for(int k = 0; k < inv.at(j).getDeg(); k++) {
+					basis.push_back(qm);
+					qm = cf * qm;
+				}
+			}
+			row.push_back(basis);
+		}
+		block.push_back(row);
+	}
+
+	cout << "finished constructing the block\n";
+	cout << "The size of block is \n" << block.size() << " * " << block.back().size() << "\n";
+	cout << "The deg of the minimal polynomial is " << inv.back().getDeg() << "\n";
+
+	//constructing the basis for Cent(A)
+	vector<Matrix<D> > basis;
+	Matrix<D> cent(dim);
+		
+	int r = 0;
+	int c = 0;
+		
+	for(int i = 0; i < inv.size(); i++) {
+		for(int j = 0; j < inv.size(); j++) {
+			for(int k = 0; k < block.at(i).at(j).size(); k++) {	
+	
+				Matrix<D> cent(dim, D(0));	
+				Matrix<D> tocopy = block.at(i).at(j).at(k);
+
+				cout << "Printing the block\n";
+				tocopy.Print();
+
+				for(int a = 0; a < inv.at(i).getDeg(); a++) {
+					for(int b = 0; b < inv.at(j).getDeg(); b++){
+						cent.setEnt(r + a,c + b, tocopy.getEnt().at(a).at(b));
+					}
+				}
+				basis.push_back(P * cent * Pinv);
+			}
+			c = c+inv.at(j).getDeg();
+		}
+		r = r + inv.at(i).getDeg();
+		c = 0;
+	}
+	cout << "add basis\n";
+
+	return basis;
+
+}
 
 #endif

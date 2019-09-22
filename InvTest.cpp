@@ -46,7 +46,7 @@ int main() {
 
 	T.Print();
 
-
+	/*
 	cout << "Testing Companian matrix\n";
 	vector<FField<mod> > vec4;
 	vec4.push_back(FField<mod> (1));
@@ -56,5 +56,14 @@ int main() {
 	Poly<FField<mod> > f(vec4);
 	Matrix<FField<mod> > Cf(f);
 	Cf.Print();
+	*/
+
+	vector<Matrix<FField<mod> > > inv2;
+	inv2 = A.Cent();
+	cout << "The basis has dimension " << inv2.size() << "\n"; 
+
+	for(int i = 0; i < inv2.size(); i++){
+		inv2.at(i).Print();
+	}
 
 }
