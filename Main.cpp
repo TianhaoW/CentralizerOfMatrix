@@ -6,7 +6,7 @@
 #include <sstream>
 
 
-#define mod 2
+#define mod 5
 
 int main() {
 	cout << "Program credit to Tianhao Wang \n";

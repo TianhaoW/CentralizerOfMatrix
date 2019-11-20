@@ -266,17 +266,17 @@ void Matrix<D>::SNF(Matrix<D>& L, Matrix<D>& R){
 			Matrix<D> Ltmp(dim);
 
 			if(entry.at(i).at(i).isUnit()){
-				cout << "unit case\n";
+				//cout << "unit case\n";
 				break;
 			}
 
 			entry.at(j).at(i).divide(entry.at(i).at(i), q, r);
 			if(r.isZero()){
-				cout << "divide case \n";
+				//cout << "divide case \n";
 				continue;
 			}
 			else{
-				cout << "not divide case\n";
+				//cout << "not divide case\n";
 				D x, y, d;
 				entry.at(i).at(i).egcd(entry.at(j).at(i), x, y, d);
 				
@@ -287,7 +287,6 @@ void Matrix<D>::SNF(Matrix<D>& L, Matrix<D>& R){
 					Ltmp.setEnt(j,j, entry.at(i).at(i));
 				}
 				else {
-					cout << "herehere\n";
 					D q1, r1, q2, r2;
 					entry.at(i).at(i).divide(d, q1, r1);
 					entry.at(j).at(i).divide(d, q2, r2);
@@ -298,34 +297,20 @@ void Matrix<D>::SNF(Matrix<D>& L, Matrix<D>& R){
 				}
 			}
 			L = Ltmp * L;
-			cout<< "Printing the Ltmp Matrix\n";
-			Ltmp.Print();
-			cout << "Printing the matrix before improving pivots\n";
-			(*this).Print();
 			(*this) = Ltmp * (*this);
-			cout << "Printing the result matrix after improving pivots\n";
-			(*this).Print();
 		}
 		//Eliminating Column Entries
 		for (int j = i + 1; j < dim; j++) {
-			if(entry.at(j).at(i).isZero()){cout << "isZero for eliminating\n"; continue;}
+			if(entry.at(j).at(i).isZero()){continue;}
 			else {
 				Matrix<D> Ltmp(dim);
 				D q,r;
 
 				entry.at(j).at(i).divide(entry.at(i).at(i), q, r);
 				
-				cout << "Printing the q for eliminating\n";
-				q.Print();
-				cout << "\n";
-
 				Ltmp.setEnt(j,i, D(0)-q);
 				L = Ltmp * L;
 				(*this) = Ltmp * (*this);
-				cout << "Printing the Ltmp for eliminating matrices\n";
-				Ltmp.Print();
-				cout << "Printing the result matrix\n";
-				(*this).Print();
 			}
 		}
 		
@@ -335,17 +320,17 @@ void Matrix<D>::SNF(Matrix<D>& L, Matrix<D>& R){
 			Matrix<D> Rtmp(dim);
 
 			if(entry.at(i).at(i).isUnit()){
-				cout << "unit case for improving pivots for rows\n";
+				//unit case for improving pivots for rows
 				break;
 			}
 
 			entry.at(i).at(j).divide(entry.at(i).at(i), q, r);
 			if(r.isZero()){
-				cout << "divide case for improving pivots for rows\n";
+				//divide case for improving pivots for rows
 				continue;
 			}
 			else{
-				cout << "not divide case for improving pivots for rows\n";
+				//not divide case for improving pivots for rows
 				D x, y, d;
 				entry.at(i).at(i).egcd(entry.at(i).at(j), x, y, d);
 				
@@ -366,15 +351,11 @@ void Matrix<D>::SNF(Matrix<D>& L, Matrix<D>& R){
 				}
 			}
 			R = R * Rtmp ;
-			cout<< "Printing the Rtmp Matrix\n";
-			Rtmp.Print();
 			(*this) =(*this) * Rtmp;
-			cout << "Printing the next matrix\n";
-			(*this).Print();
 		}
 		//Eliminating Row Entries
 		for (int j = i + 1; j < dim; j++) {
-			if(entry.at(i).at(j).isZero()){cout << "isZero for eliminating\n"; continue;}
+			if(entry.at(i).at(j).isZero()){continue;}
 			else {
 				Matrix<D> Rtmp(dim);
 				D q,r;
@@ -383,40 +364,26 @@ void Matrix<D>::SNF(Matrix<D>& L, Matrix<D>& R){
 				Rtmp.setEnt(i,j, D(0)-q);
 				R = R * Rtmp;
 				(*this) = (*this) * Rtmp;
-				cout << "Printing the Rtmp for eliminating matrices\n";
-				Rtmp.Print();
-				cout << "Printing the result matrix after row elimination\n";
-				(*this).Print();
 			}
 		}	
 	}
-	cout << "Printing L\n";
-	L.Print();
-	cout << "Printing R\n";
-	R.Print();
 
 	//Re-arranging diagonals
 	for (int i = 0; i < dim - 1; i++){
-		if (entry.at(i).at(i).isUnit()){cout << "Rearranging: Unit case\n"; continue;}
+		if (entry.at(i).at(i).isUnit()){continue;}
 		D q,r;
 		entry.at(i+1).at(i+1).divide(entry.at(i).at(i), q, r);
-		if (r.isZero()){cout << "Rearranging: divide case\n"; continue;}
+		if (r.isZero()){continue;}
 		
-		cout << "Rearranging: not divide case\n";
+		//Rearranging: not divide case
 
 		Matrix<D> Rtmp(dim);
 		Matrix<D> Ltmp(dim);
 
 		Rtmp.setEnt(i+1, i, D(1));
 
-		cout << "Printing the Rtmp\n";
-		Rtmp.Print();
-
 		(*this) = (*this) * Rtmp;
 		R = R * Rtmp;
-
-		cout << "Printing the result matrix\n";
-		(*this).Print();
 
 		D x, y, d;
 		entry.at(i).at(i).egcd(entry.at(i+1).at(i), x, y, d);
@@ -438,15 +405,11 @@ void Matrix<D>::SNF(Matrix<D>& L, Matrix<D>& R){
 		}
 
 		L = Ltmp * L;
-		cout<< "Printing the Ltmp Matrix\n";
-		Ltmp.Print();
 		(*this) = Ltmp * (*this);
-		cout << "Printing the next matrix\n";
-		(*this).Print();
 
 		//Eliminating Column Entries
 
-		if(entry.at(i).at(i+1).isZero()){cout << "isZero for eliminating\n"; continue;}
+		if(entry.at(i).at(i+1).isZero()){continue;}
 		else {
 			Matrix<D> Rtmp(dim);
 			D q,r;
@@ -455,18 +418,8 @@ void Matrix<D>::SNF(Matrix<D>& L, Matrix<D>& R){
 			Rtmp.setEnt(i,i+1, D(0)-q);
 			R = R * Rtmp;
 			(*this) = (*this) * Rtmp;
-			cout << "Printing the Rtmp for eliminating matrices\n";
-			Rtmp.Print();
-			cout << "Printing the result matrix after row elimination\n";
-			(*this).Print();
 		}
 	}
-	cout << "Printing the final matrix L\n";
-	L.Print();
-	cout << "Printing the final matrix R\n";
-	R.Print();
-	cout << "Printing the result matrix \n";
-	(*this).Print();
 }
 
 template<class D>
@@ -496,13 +449,13 @@ Matrix<D> Matrix<D>::Invf(vector<Poly<D> >& inv) const{
 		else {
 			inv.push_back(tmp.getEnt().at(i).at(i));
 			deg.push_back(tmp.getEnt().at(i).at(i).getDeg());
-			cout << "Printing the saved degree\n";
-			cout << tmp.getEnt().at(i).at(i).getDeg();
-			cout << "\n";
+			//cout << "Printing the saved degree\n";
+			//cout << tmp.getEnt().at(i).at(i).getDeg();
+			//cout << "\n";
 		}
 	}
 
-	cout << "index is " << index << "\n";
+	//cout << "index is " << index << "\n";
 
 	//Constructing the transformation matrix
 	Matrix<Poly<D> > Linv = L.inverse();
@@ -539,8 +492,8 @@ Matrix<D> Matrix<D>::Invf(vector<Poly<D> >& inv) const{
 		
 		// updating the matrix P
 		for (int i = 0; i < deg.at(index); i++){
-			cout << deg.at(index);
-			cout << "Updating P\n";
+			//cout << deg.at(index);
+			//cout << "Updating P\n";
 			for (int k = 0; k < dim; k++) {
 				P.setEnt(k, j, col.at(k));
 			}
@@ -565,7 +518,7 @@ vector<Matrix<D> > Matrix<D>::Cent() const{
 	for(int i = 0; i < inv.size(); i++){
 		Cdim = Cdim + (2 * i + 1) * inv.at(inv.size() - i - 1).getDeg();
 	}
-	cout << "The k-dimension of the centralizer is " << Cdim << "\n";
+	//cout << "The k-dimension of the centralizer is " << Cdim << "\n";
 
 	//constructing the k-basis for each block
 	vector<vector< vector <Matrix<D> > > >block;
@@ -645,9 +598,9 @@ vector<Matrix<D> > Matrix<D>::Cent() const{
 		block.push_back(row);
 	}
 
-	cout << "finished constructing the block\n";
-	cout << "The size of block is \n" << block.size() << " * " << block.back().size() << "\n";
-	cout << "The deg of the minimal polynomial is " << inv.back().getDeg() << "\n";
+	//cout << "finished constructing the block\n";
+	//cout << "The size of block is \n" << block.size() << " * " << block.back().size() << "\n";
+	//cout << "The deg of the minimal polynomial is " << inv.back().getDeg() << "\n";
 
 	//constructing the basis for Cent(A)
 	vector<Matrix<D> > basis;
@@ -663,8 +616,8 @@ vector<Matrix<D> > Matrix<D>::Cent() const{
 				Matrix<D> cent(dim, D(0));	
 				Matrix<D> tocopy = block.at(i).at(j).at(k);
 
-				cout << "Printing the block\n";
-				tocopy.Print();
+				//cout << "Printing the block\n";
+				//tocopy.Print();
 
 				for(int a = 0; a < inv.at(i).getDeg(); a++) {
 					for(int b = 0; b < inv.at(j).getDeg(); b++){
@@ -678,7 +631,7 @@ vector<Matrix<D> > Matrix<D>::Cent() const{
 		r = r + inv.at(i).getDeg();
 		c = 0;
 	}
-	cout << "add basis\n";
+	//cout << "add basis\n";
 
 	return basis;
 
